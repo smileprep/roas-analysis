@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Area } from 'recharts';
+import { defaultGoogleData } from './data/defaultGoogleData';
+import { defaultLevantaData } from './data/defaultLevantaData';
 
-const ROASAnalysis = () => {
+function App() {
   const [mergedData, setMergedData] = useState([]);
   const [rollingAverageData, setRollingAverageData] = useState([]);
   const [error, setError] = useState('');
@@ -121,6 +123,18 @@ const ROASAnalysis = () => {
     return sortedData;
   };
 
+  // Add useEffect to load default data
+  useEffect(() => {
+    try {
+      const googleAdsData = processGoogleAdsData(defaultGoogleData);
+      const levantaData = processLevantaData(defaultLevantaData);
+      const merged = mergeData(googleAdsData, levantaData);
+      setMergedData(merged);
+    } catch (err) {
+      setError('Error processing default data: ' + err.message);
+    }
+  }, []); // Empty dependency array means this runs once on mount
+
   const handleFileUpload = async (e) => {
     try {
       setError('');
@@ -176,8 +190,11 @@ const ROASAnalysis = () => {
                 onClick={() => document.getElementById('file-upload').click()}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
               >
-                Upload CSV Files
+                Upload New CSV Files
               </button>
+              <p className="mt-2 text-sm text-gray-500 text-center">
+                Using default data. Upload new files to override.
+              </p>
             </div>
 
             {error && (
@@ -319,6 +336,6 @@ const ROASAnalysis = () => {
       </div>
     </div>
   );
-};
+}
 
-export default ROASAnalysis;
+export default App;
