@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Area } from 'recharts';
+import { ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Area, ReferenceLine } from 'recharts';
 import { defaultGoogleData } from './data/defaultGoogleData';
 import { defaultLevantaData } from './data/defaultLevantaData';
 import DatePicker from 'react-datepicker';
@@ -362,7 +362,7 @@ useEffect(() => {
                     <ComposedChart width={1000} height={350} data={filteredMergedData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
-                      <YAxis yAxisId="left" orientation="left" />
+                      <YAxis yAxisId="left" orientation="left" ticks={[0, 1.0]} />
                       <YAxis yAxisId="right" orientation="right" />
                       <Tooltip />
                       <Legend />
@@ -390,6 +390,7 @@ useEffect(() => {
                         name="Levanta ROAS"
                         dot={{ r: 3 }}
                       />
+                      <ReferenceLine y={1.0} yAxisId="left" stroke="red" strokeDasharray="3 3" />
                     </ComposedChart>
                   </div>
 
@@ -398,7 +399,7 @@ useEffect(() => {
                     <ComposedChart width={1000} height={350} data={filteredRollingAverageData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
-                      <YAxis yAxisId="left" orientation="left" />
+                      <YAxis yAxisId="left" orientation="left" ticks={[0, 1.0]} />
                       <YAxis yAxisId="right" orientation="right" />
                       <Tooltip />
                       <Legend />
@@ -426,6 +427,7 @@ useEffect(() => {
                         name="Levanta ROAS (7-day avg)"
                         dot={{ r: 3 }}
                       />
+                      <ReferenceLine y={1.0} yAxisId="left" stroke="red" strokeDasharray="3 3" />
                     </ComposedChart>
                   </div>
 
