@@ -140,6 +140,26 @@ const rollingDifferenceRoasData = differenceRoasData.map((row, index, arr) => {
   };
 });
 
+// Add these calculations where other data processing happens
+const roasRatioData = mergedData.map((row) => ({
+  date: row.date,
+  roasRatio: row.googleRoas === 0 ? 0 : row.levantaRoas / row.googleRoas,
+  cost: row.cost
+}));
+
+// Calculate rolling average
+const rollingRoasRatioData = roasRatioData.map((row, index, arr) => {
+  const start = Math.max(0, index - 6);
+  const slice = arr.slice(start, index + 1);
+  const totalRatio = slice.reduce((sum, item) => sum + item.roasRatio, 0);
+  const totalCost = slice.reduce((sum, item) => sum + item.cost, 0) / slice.length;
+  return {
+    date: row.date,
+    rollingRoasRatioAvg: totalRatio / slice.length,
+    costAvg: totalCost
+  };
+});
+
   useEffect(() => {
     try {
       const storedGoogleAdsData = localStorage.getItem('googleAdsData');
@@ -217,12 +237,14 @@ const rollingDifferenceRoasData = differenceRoasData.map((row, index, arr) => {
                 className="hidden"
                 id="file-upload"
               />
+             
               <button
                 onClick={() => document.getElementById('file-upload').click()}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
               >
                 Upload New CSV Files
               </button>
+              
               <p className="mt-2 text-sm text-gray-500 text-center">
                 Using default data. Upload new files to override.
               </p>
@@ -311,7 +333,7 @@ const rollingDifferenceRoasData = differenceRoasData.map((row, index, arr) => {
 
 {/* Difference in ROAS Chart */}
 <div className="w-full h-[400px] bg-white p-4 rounded-lg border border-gray-200">
-                    <h3 className="text-lg font-semibold mb-4">Difference in ROAS</h3>
+                    <h3 className="text-lg font-semibold mb-4">Difference in ROAS (Levanta - Google)</h3>
                     <ComposedChart width={1000} height={350} data={differenceRoasData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
@@ -330,10 +352,10 @@ const rollingDifferenceRoasData = differenceRoasData.map((row, index, arr) => {
                     </ComposedChart>
                   </div>
 
-                  {/* Rolling 7-Day Average Difference in ROAS Chart */}
-                  <div className="w-full h-[400px] bg-white p-4 rounded-lg border border-gray-200">
-                    <h3 className="text-lg font-semibold mb-4">7-Day Rolling Average Difference in ROAS</h3>
-                    <ComposedChart width={1000} height={350} data={rollingDifferenceRoasData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+{/* ROAS Ratio Chart */}
+<div className="w-full h-[400px] bg-white p-4 rounded-lg border border-gray-200">
+                    <h3 className="text-lg font-semibold mb-4">ROAS Ratio (Levanta/Google)</h3>
+                    <ComposedChart width={1000} height={350} data={roasRatioData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
                       <YAxis yAxisId="left" orientation="left" />
@@ -343,66 +365,71 @@ const rollingDifferenceRoasData = differenceRoasData.map((row, index, arr) => {
                       <Line 
                         yAxisId="left"
                         type="monotone" 
-                        dataKey="rollingDifferenceRoasAvg" 
-                        stroke="#10B981" 
-                        name="Rolling Avg Difference in ROAS"
+                        dataKey="roasRatio" 
+                        stroke="#4F46E5" 
+                        name="ROAS Ratio"
                         dot={{ r: 3 }}
                       />
                     </ComposedChart>
                   </div>
-                </div>
 
-                <div className="overflow-x-auto rounded-lg border border-gray-200">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Date
-                        </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Google Conv. Value
-                        </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Levanta Conv. Value
-                        </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Cost
-                        </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Google ROAS
-                        </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Levanta ROAS
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {mergedData.map((row) => (
-                        <tr key={row.date} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {row.date}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500">
-                            ${row.googleConvValue.toFixed(2)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500">
-                            ${row.levantaConvValue.toFixed(2)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500">
-                            ${row.cost.toFixed(2)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500">
-                            {row.googleRoas}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500">
-                            {row.levantaRoas}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
                 </div>
-              </>
+                <br></br>
+                <br></br>
+
+
+<div className="overflow-x-auto rounded-lg border border-gray-200 shadow-md">
+  <table className="min-w-full divide-y divide-gray-200">
+    <thead className="bg-gray-100 sticky top-0 shadow-sm">
+      <tr>
+        <th className="px-8 py-5 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">
+          Date
+        </th>
+        <th className="px-8 py-5 text-right text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">
+          Cost
+        </th>
+        <th className="px-8 py-5 text-right text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">
+          Google Conv. Value
+        </th>
+        <th className="px-8 py-5 text-right text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">
+          Levanta Conv. Value
+        </th>
+        <th className="px-8 py-5 text-right text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">
+          Google ROAS
+        </th>
+        <th className="px-8 py-5 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">
+          Levanta ROAS
+        </th>
+      </tr>
+    </thead>
+    <tbody className="bg-white divide-y divide-gray-200">
+      {[...mergedData].reverse().map((row, index) => (
+        <tr key={row.date} 
+            className={`hover:bg-blue-50 transition-colors duration-150 ease-in-out
+            ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+          <td className="px-8 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border-r border-gray-200">
+            {row.date}
+          </td>
+          <td className="px-8 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900 border-r border-gray-200">
+            ${row.cost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </td>
+          <td className="px-8 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900 border-r border-gray-200">
+            ${row.googleConvValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </td>
+          <td className="px-8 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900 border-r border-gray-200">
+            ${row.levantaConvValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </td>
+          <td className="px-8 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900 border-r border-gray-200">
+            {parseFloat(row.googleRoas).toFixed(2)}
+          </td>
+          <td className="px-8 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900">
+            {parseFloat(row.levantaRoas).toFixed(2)}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>              </>
             )}
           </div>
         </div>
