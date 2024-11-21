@@ -123,6 +123,23 @@ function App() {
     });
   };
 
+// Calculate the difference in ROAS
+const differenceRoasData = mergedData.map((row) => ({
+  date: row.date,
+  differenceRoas: row.levantaRoas - row.googleRoas,
+}));
+
+// Calculate the rolling 7-day average of the difference in ROAS
+const rollingDifferenceRoasData = differenceRoasData.map((row, index, arr) => {
+  const start = Math.max(0, index - 6);
+  const slice = arr.slice(start, index + 1);
+  const total = slice.reduce((sum, item) => sum + item.differenceRoas, 0);
+  return {
+    date: row.date,
+    rollingDifferenceRoasAvg: total / slice.length,
+  };
+});
+
   useEffect(() => {
     try {
       const storedGoogleAdsData = localStorage.getItem('googleAdsData');
@@ -287,6 +304,48 @@ function App() {
                         dataKey="levantaRoasAvg" 
                         stroke="#10B981" 
                         name="Levanta ROAS (7-day avg)"
+                        dot={{ r: 3 }}
+                      />
+                    </ComposedChart>
+                  </div>
+
+{/* Difference in ROAS Chart */}
+<div className="w-full h-[400px] bg-white p-4 rounded-lg border border-gray-200">
+                    <h3 className="text-lg font-semibold mb-4">Difference in ROAS</h3>
+                    <ComposedChart width={1000} height={350} data={differenceRoasData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" />
+                      <YAxis yAxisId="left" orientation="left" />
+                      <YAxis yAxisId="right" orientation="right" />
+                      <Tooltip />
+                      <Legend />
+                      <Line 
+                        yAxisId="left"
+                        type="monotone" 
+                        dataKey="differenceRoas" 
+                        stroke="#4F46E5" 
+                        name="Difference in ROAS"
+                        dot={{ r: 3 }}
+                      />
+                    </ComposedChart>
+                  </div>
+
+                  {/* Rolling 7-Day Average Difference in ROAS Chart */}
+                  <div className="w-full h-[400px] bg-white p-4 rounded-lg border border-gray-200">
+                    <h3 className="text-lg font-semibold mb-4">7-Day Rolling Average Difference in ROAS</h3>
+                    <ComposedChart width={1000} height={350} data={rollingDifferenceRoasData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" />
+                      <YAxis yAxisId="left" orientation="left" />
+                      <YAxis yAxisId="right" orientation="right" />
+                      <Tooltip />
+                      <Legend />
+                      <Line 
+                        yAxisId="left"
+                        type="monotone" 
+                        dataKey="rollingDifferenceRoasAvg" 
+                        stroke="#10B981" 
+                        name="Rolling Avg Difference in ROAS"
                         dot={{ r: 3 }}
                       />
                     </ComposedChart>
