@@ -2,11 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Area } from 'recharts';
 import { defaultGoogleData } from './data/defaultGoogleData';
 import { defaultLevantaData } from './data/defaultLevantaData';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+
 
 function App() {
   const [mergedData, setMergedData] = useState([]);
   const [rollingAverageData, setRollingAverageData] = useState([]);
   const [error, setError] = useState('');
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null); 
+  const [dataDateRange, setDataDateRange] = useState({ start: null, end: null });
 
   const processGoogleAdsData = (text) => {
     const rows = text.split('\n').filter(row => row.trim());
@@ -182,6 +188,18 @@ const rollingRoasRatioData = roasRatioData.map((row, index, arr) => {
     }
   }, []); // Empty dependency array means this runs once on mount
 
+  // Add this after mergedData is set (in the useEffect or where data is merged)
+useEffect(() => {
+  if (mergedData.length > 0) {
+    const dates = mergedData.map(d => new Date(d.date));
+    setDataDateRange({
+      start: new Date(Math.min(...dates)).toISOString().split('T')[0],
+      end: new Date(Math.max(...dates)).toISOString().split('T')[0]
+    });
+  }
+}, [mergedData]);
+
+
   const handleFileUpload = async (e) => {
     try {
       setError('');
@@ -221,12 +239,55 @@ const rollingRoasRatioData = roasRatioData.map((row, index, arr) => {
     }
   };
 
+    // Add filtering functions
+  // Filtering functions for each data source
+  const getFilteredMergedData = () => {
+    if (!startDate || !endDate) return mergedData;
+    return mergedData.filter(row => {
+      const rowDate = new Date(row.date);
+      return rowDate >= startDate && rowDate <= endDate;
+    });
+  };
+
+  const getFilteredRollingAverageData = () => {
+    if (!startDate || !endDate) return rollingAverageData;
+    return rollingAverageData.filter(row => {
+      const rowDate = new Date(row.date);
+      return rowDate >= startDate && rowDate <= endDate;
+    });
+  };
+
+  const getFilteredDifferenceRoasData = () => {
+    if (!startDate || !endDate) return differenceRoasData;
+    return differenceRoasData.filter(row => {
+      const rowDate = new Date(row.date);
+      return rowDate >= startDate && rowDate <= endDate;
+    });
+  };
+
+  const getFilteredRoasRatioData = () => {
+    if (!startDate || !endDate) return roasRatioData;
+    return roasRatioData.filter(row => {
+      const rowDate = new Date(row.date);
+      return rowDate >= startDate && rowDate <= endDate;
+    });
+  };
+
+  // Store filtered data at render start
+  const filteredMergedData = getFilteredMergedData();
+  const filteredRollingAverageData = getFilteredRollingAverageData();
+  const filteredDifferenceRoasData = getFilteredDifferenceRoasData();
+  const filteredRoasRatioData = getFilteredRoasRatioData();
+
+
+
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-7xl mx-auto">
         <div className="bg-white rounded-xl shadow-lg p-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">ROAS Analysis Dashboard</h2>
-          
+
+              
           <div className="space-y-6">
             <div>
               <input
@@ -256,12 +317,49 @@ const rollingRoasRatioData = roasRatioData.map((row, index, arr) => {
               </div>
             )}
 
+                            {/* Add Date Pickers here */}
+      <div className="mb-6">
+        <div className="flex gap-4 items-center mb-2">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+            <DatePicker
+              selected={startDate}
+              onChange={date => setStartDate(date)}
+              selectsStart
+              startDate={startDate}
+              endDate={endDate}
+              className="px-3 py-2 border border-gray-300 rounded-md"
+              dateFormat="yyyy-MM-dd"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+            <DatePicker
+              selected={endDate}
+              onChange={date => setEndDate(date)}
+              selectsEnd
+              startDate={startDate}
+              endDate={endDate}
+              minDate={startDate}
+              className="px-3 py-2 border border-gray-300 rounded-md"
+              dateFormat="yyyy-MM-dd"
+            />
+          </div>
+        </div>
+        {dataDateRange.start && (
+          <p className="text-sm text-gray-600">
+            Available data range: {dataDateRange.start} to {dataDateRange.end}
+          </p>
+        )}
+      </div>  
+
+
             {mergedData.length > 0 && (
               <>
                 <div className="space-y-6">
                   <div className="w-full h-[400px] bg-white p-4 rounded-lg border border-gray-200">
                     <h3 className="text-lg font-semibold mb-4">Daily Values</h3>
-                    <ComposedChart width={1000} height={350} data={mergedData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                    <ComposedChart width={1000} height={350} data={filteredMergedData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
                       <YAxis yAxisId="left" orientation="left" />
@@ -297,7 +395,7 @@ const rollingRoasRatioData = roasRatioData.map((row, index, arr) => {
 
                   <div className="w-full h-[400px] bg-white p-4 rounded-lg border border-gray-200">
                     <h3 className="text-lg font-semibold mb-4">7-Day Rolling Average</h3>
-                    <ComposedChart width={1000} height={350} data={rollingAverageData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                    <ComposedChart width={1000} height={350} data={filteredRollingAverageData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
                       <YAxis yAxisId="left" orientation="left" />
@@ -334,7 +432,7 @@ const rollingRoasRatioData = roasRatioData.map((row, index, arr) => {
 {/* Difference in ROAS Chart */}
 <div className="w-full h-[400px] bg-white p-4 rounded-lg border border-gray-200">
                     <h3 className="text-lg font-semibold mb-4">Difference in ROAS (Levanta - Google)</h3>
-                    <ComposedChart width={1000} height={350} data={differenceRoasData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                    <ComposedChart width={1000} height={350} data={filteredDifferenceRoasData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
                       <YAxis yAxisId="left" orientation="left" />
@@ -355,7 +453,7 @@ const rollingRoasRatioData = roasRatioData.map((row, index, arr) => {
 {/* ROAS Ratio Chart */}
 <div className="w-full h-[400px] bg-white p-4 rounded-lg border border-gray-200">
                     <h3 className="text-lg font-semibold mb-4">ROAS Ratio (Levanta/Google)</h3>
-                    <ComposedChart width={1000} height={350} data={roasRatioData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                    <ComposedChart width={1000} height={350} data={filteredRoasRatioData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
                       <YAxis yAxisId="left" orientation="left" />
@@ -403,7 +501,7 @@ const rollingRoasRatioData = roasRatioData.map((row, index, arr) => {
       </tr>
     </thead>
     <tbody className="bg-white divide-y divide-gray-200">
-      {[...mergedData].reverse().map((row, index) => (
+      {[...filteredMergedData].reverse().map((row, index) => (
         <tr key={row.date} 
             className={`hover:bg-blue-50 transition-colors duration-150 ease-in-out
             ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
