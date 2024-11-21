@@ -13,6 +13,7 @@ function App() {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null); 
   const [dataDateRange, setDataDateRange] = useState({ start: null, end: null });
+  const isLocal = window.location.hostname === 'localhost';
 
   // Add this with other utility functions (around line 15)
 const getDataRange = (data, keys) => {
@@ -229,46 +230,56 @@ useEffect(() => {
 }, [mergedData]);
 
 
-  const handleFileUpload = async (e) => {
-    try {
-      setError('');
-      const files = Array.from(e.target.files);
-      if (files.length !== 2) {
-        setError('Please upload exactly two files');
-        return;
-      }
-
-      const fileContents = await Promise.all(
-        files.map(file => file.text())
-      );
-
-      let googleAdsData, levantaData;
-
-      fileContents.forEach(content => {
-        if (content.includes('Conv. value,Currency code,Cost')) {
-          googleAdsData = processGoogleAdsData(content);
-        } else if (content.includes('Clicks,DPVs,AddToCart')) {
-          levantaData = processLevantaData(content);
-        }
-      });
-
-      if (!googleAdsData || !levantaData) {
-        setError('Please upload both Google Ads and Levanta data files in the correct format');
-        return;
-      }
-
-      const merged = mergeData(googleAdsData, levantaData);
-      setMergedData(merged);
-
-      // Save new data to local storage
-      localStorage.setItem('googleAdsData', JSON.stringify(googleAdsData));
-      localStorage.setItem('levantaData', JSON.stringify(levantaData));
-    } catch (err) {
-      setError('Error processing files: ' + err.message);
+const handleFileUpload = async (e) => {
+  try {
+    setError('');
+    const files = Array.from(e.target.files);
+    if (files.length !== 2) {
+      setError('Please upload exactly two files');
+      return;
     }
-  };
 
-    // Add filtering functions
+    const fileContents = await Promise.all(
+      files.map(file => file.text())
+    );
+
+    let googleAdsData, levantaData;
+
+    fileContents.forEach(content => {
+      if (content.includes('Conv. value,Currency code,Cost')) {
+        googleAdsData = processGoogleAdsData(content);
+      } else if (content.includes('Clicks,DPVs,AddToCart')) {
+        levantaData = processLevantaData(content);
+      }
+    });
+
+    if (!googleAdsData || !levantaData) {
+      setError('Please upload both Google Ads and Levanta data files in the correct format');
+      return;
+    }
+
+    const merged = mergeData(googleAdsData, levantaData);
+    setMergedData(merged);
+
+    // Save new data to local storage
+    localStorage.setItem('googleAdsData', JSON.stringify(googleAdsData));
+    localStorage.setItem('levantaData', JSON.stringify(levantaData));
+
+    // Only update default files if running locally
+    if (isLocal) {
+      await fetch('http://localhost:5001/update-default-data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ googleAdsData, levantaData })
+      });
+    }
+  } catch (err) {
+    setError('Error processing files: ' + err.message);
+  }
+};
+// Add filtering functions
   // Filtering functions for each data source
   const getFilteredMergedData = () => {
     if (!startDate || !endDate) return mergedData;
