@@ -14,6 +14,35 @@ function App() {
   const [endDate, setEndDate] = useState(null); 
   const [dataDateRange, setDataDateRange] = useState({ start: null, end: null });
 
+  // Add this with other utility functions (around line 15)
+const getDataRange = (data, keys) => {
+  const allValues = data.flatMap(item => 
+    keys.map(key => item[key])
+  ).filter(val => val !== undefined);
+  
+  return {
+    min: Math.min(...allValues),
+    max: Math.max(...allValues)
+  };
+};
+
+  const calculateMovingAverage = (data, key, window = 7) => {
+    return data.map((point, index) => {
+      // Get window of points centered on current point
+      const start = Math.max(0, index - Math.floor(window/2));
+      const end = Math.min(data.length, index + Math.floor(window/2) + 1);
+      const windowData = data.slice(start, end);
+      
+      // Calculate average for window
+      const average = windowData.reduce((sum, p) => sum + p[key], 0) / windowData.length;
+      
+      return {
+        date: point.date,
+        trendline: average
+      };
+    });
+  };
+  
   const processGoogleAdsData = (text) => {
     const rows = text.split('\n').filter(row => row.trim());
     const data = rows.slice(3).map(row => {
@@ -278,8 +307,8 @@ useEffect(() => {
   const filteredRollingAverageData = getFilteredRollingAverageData();
   const filteredDifferenceRoasData = getFilteredDifferenceRoasData();
   const filteredRoasRatioData = getFilteredRoasRatioData();
-
-
+  const differenceTrendlineData = calculateMovingAverage(filteredDifferenceRoasData, 'differenceRoas');
+  const roasRatioDataTrendData = calculateMovingAverage(filteredRoasRatioData, 'roasRatio');
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -437,7 +466,14 @@ useEffect(() => {
                     <ComposedChart width={1000} height={350} data={filteredDifferenceRoasData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
-                      <YAxis yAxisId="left" orientation="left" />
+                      <YAxis 
+                        yAxisId="left" 
+                        orientation="left"
+                        domain={[
+                          dataMin => -0.5,
+                          dataMax => 1.5
+                        ]}
+                      />
                       <YAxis yAxisId="right" orientation="right" />
                       <Tooltip />
                       <Legend />
@@ -449,6 +485,17 @@ useEffect(() => {
                         name="Difference in ROAS"
                         dot={{ r: 3 }}
                       />
+                      <Line 
+                        yAxisId="left"
+                        type="monotone"
+                        dataKey="trendline"
+                        stroke="#FF8C00"
+                        name="Trendline"
+                        dot={false}
+                        strokeDasharray="5 5"
+                        data={differenceTrendlineData}
+                      />
+                      <ReferenceLine y={0.0} yAxisId="left" stroke="red" strokeDasharray="3 3" />
                     </ComposedChart>
                   </div>
 
@@ -458,7 +505,15 @@ useEffect(() => {
                     <ComposedChart width={1000} height={350} data={filteredRoasRatioData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
-                      <YAxis yAxisId="left" orientation="left" />
+                      <YAxis 
+                        yAxisId="left" 
+                        orientation="left"
+                        domain={[
+                          dataMin => Math.floor(Math.min(dataMin, getDataRange(filteredRoasRatioData, ['differenceRoas']).min)),
+                          dataMax => Math.ceil(Math.max(dataMax, getDataRange(filteredRoasRatioData, ['differenceRoas']).max))
+                        ]}
+                      />
+\
                       <YAxis yAxisId="right" orientation="right" />
                       <Tooltip />
                       <Legend />
@@ -470,6 +525,19 @@ useEffect(() => {
                         name="ROAS Ratio"
                         dot={{ r: 3 }}
                       />
+                      <Line 
+                        yAxisId="left"
+                        type="monotone"
+                        dataKey="trendline"
+                        stroke="#FF8C00"
+                        name="Trendline"
+                        dot={false}
+                        strokeDasharray="5 5"
+                        data={roasRatioDataTrendData}
+                      />
+                      <ReferenceLine y={1.0} yAxisId="left" stroke="red" strokeDasharray="3 3" />
+
+
                     </ComposedChart>
                   </div>
 
