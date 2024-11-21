@@ -14,6 +14,7 @@ function App() {
   const [endDate, setEndDate] = useState(null); 
   const [dataDateRange, setDataDateRange] = useState({ start: null, end: null });
   const isLocal = window.location.hostname === 'localhost';
+  const [isUsingCustomData, setIsUsingCustomData] = useState(false);
 
   // Add this with other utility functions (around line 15)
 const getDataRange = (data, keys) => {
@@ -44,50 +45,68 @@ const getDataRange = (data, keys) => {
     });
   };
   
-  const processGoogleAdsData = (text) => {
-    const rows = text.split('\n').filter(row => row.trim());
-    const data = rows.slice(3).map(row => {
-      const [date, convValue, , cost] = row.split(',');
-      return {
-        date: date.replace(/"/g, ''),
-        googleConvValue: parseFloat(convValue),
-        cost: parseFloat(cost)
-      };
-    });
-    return data;
+  const processGoogleAdsData = (input) => {
+    if (typeof input === 'string') {
+      console.log('Processing Google Ads Data as string:', input);
+      const rows = input.split('\n').filter(row => row.trim());
+      const data = rows.slice(3).map(row => {
+        const [date, convValue, , cost] = row.split(',');
+        return {
+          date: date.replace(/"/g, ''),
+          googleConvValue: parseFloat(convValue),
+          cost: parseFloat(cost)
+        };
+      });
+      return data;
+    } else {
+      console.log('Processing Google Ads Data as array:', input);
+      return input.map(row => ({
+        date: row.date,
+        googleConvValue: parseFloat(row.googleConvValue),
+        cost: parseFloat(row.cost)
+      }));
+    }
   };
 
-  const processLevantaData = (text) => {
-    const rows = text.split('\n').filter(row => row.trim());
-    const data = rows.slice(1).map(row => {
-      const matches = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-      if (!matches) return null;
-      
-      const values = matches.map(val => val.replace(/"/g, ''));
-      const commission = values[6];
-      
-      if (!commission) {
-        console.error('Missing commission value for row:', row);
-        return null;
-      }
-
-      const cleanCommission = commission.replace(/[$,]/g, '');
-      const commissionValue = parseFloat(cleanCommission);
-
-      if (isNaN(commissionValue)) {
-        console.error('Invalid commission value:', commission);
-        return null;
-      }
-
-      return {
-        date: values[0],
-        levantaConvValue: commissionValue
-      };
-    }).filter(item => item !== null);
-
-    return data;
+  const processLevantaData = (input) => {
+    if (typeof input === 'string') {
+      console.log('Processing Levanta Data as string:', input);
+      const rows = input.split('\n').filter(row => row.trim());
+      const data = rows.slice(1).map(row => {
+        const matches = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+        if (!matches) return null;
+        
+        const values = matches.map(val => val.replace(/"/g, ''));
+        const commission = values[6];
+        
+        if (!commission) {
+          console.error('Missing commission value for row:', row);
+          return null;
+        }
+  
+        const cleanCommission = commission.replace(/[$,]/g, '');
+        const commissionValue = parseFloat(cleanCommission);
+  
+        if (isNaN(commissionValue)) {
+          console.error('Invalid commission value:', commission);
+          return null;
+        }
+  
+        return {
+          date: values[0],
+          levantaConvValue: commissionValue
+        };
+      }).filter(item => item !== null);
+  
+      return data;
+    } else {
+      console.log('Processing Levanta Data as array:', input);
+      return input.map(row => ({
+        date: row.date,
+        levantaConvValue: parseFloat(row.levantaConvValue)
+      }));
+    }
   };
-
   const formatDate = (dateStr) => {
     try {
       let date;
@@ -200,24 +219,30 @@ const rollingRoasRatioData = roasRatioData.map((row, index, arr) => {
     try {
       const storedGoogleAdsData = localStorage.getItem('googleAdsData');
       const storedLevantaData = localStorage.getItem('levantaData');
-
+  
       let googleAdsData, levantaData;
-
+  
       if (storedGoogleAdsData && storedLevantaData) {
         googleAdsData = JSON.parse(storedGoogleAdsData);
         levantaData = JSON.parse(storedLevantaData);
+        setIsUsingCustomData(true);
       } else {
         googleAdsData = processGoogleAdsData(defaultGoogleData);
         levantaData = processLevantaData(defaultLevantaData);
+        setIsUsingCustomData(false);
       }
-
+  
+      console.log('Google Ads Data:', googleAdsData);
+      console.log('Levanta Data:', levantaData);
+      console.log('Is Using Custom Data:', isUsingCustomData);
+  
       const merged = mergeData(googleAdsData, levantaData);
       setMergedData(merged);
     } catch (err) {
       setError('Error processing default data: ' + err.message);
     }
   }, []); // Empty dependency array means this runs once on mount
-
+  
   // Add this after mergedData is set (in the useEffect or where data is merged)
 useEffect(() => {
   if (mergedData.length > 0) {
@@ -264,6 +289,9 @@ const handleFileUpload = async (e) => {
     // Save new data to local storage
     localStorage.setItem('googleAdsData', JSON.stringify(googleAdsData));
     localStorage.setItem('levantaData', JSON.stringify(levantaData));
+    setIsUsingCustomData(true);
+
+    console.log('Is Using Custom Data:', isUsingCustomData);
 
     // Only update default files if running locally
     if (isLocal) {
@@ -278,6 +306,21 @@ const handleFileUpload = async (e) => {
   } catch (err) {
     setError('Error processing files: ' + err.message);
   }
+};
+
+
+const revertToDefaultData = () => {
+  localStorage.removeItem('googleAdsData');
+  localStorage.removeItem('levantaData');
+  setIsUsingCustomData(false);
+
+  const googleAdsData = processGoogleAdsData(defaultGoogleData);
+  const levantaData = processLevantaData(defaultLevantaData);
+
+  const merged = mergeData(googleAdsData, levantaData);
+  setMergedData(merged);
+
+  console.log('Is Using Custom Data:', isUsingCustomData);
 };
 // Add filtering functions
   // Filtering functions for each data source
@@ -326,8 +369,7 @@ const handleFileUpload = async (e) => {
       <div className="max-w-7xl mx-auto">
         <div className="bg-white rounded-xl shadow-lg p-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">ROAS Analysis Dashboard</h2>
-
-              
+  
           <div className="space-y-6">
             <div>
               <input
@@ -338,25 +380,30 @@ const handleFileUpload = async (e) => {
                 className="hidden"
                 id="file-upload"
               />
-             
               <button
                 onClick={() => document.getElementById('file-upload').click()}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
               >
                 Upload New CSV Files
               </button>
-              
               <p className="mt-2 text-sm text-gray-500 text-center">
-                Using default data. Upload new files to override.
+                {isUsingCustomData ? 'Using custom data.' : 'Using default data. Upload new files to override.'}
               </p>
+              {isUsingCustomData && (
+                <button
+                  onClick={revertToDefaultData}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors mt-2"
+                >
+                  Revert to Default Data
+                </button>
+              )}
             </div>
-
+  
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
                 {error}
               </div>
             )}
-
                             {/* Add Date Pickers here */}
       <div className="mb-6">
         <div className="flex gap-4 items-center mb-2">
