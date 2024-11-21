@@ -69,24 +69,6 @@ function App() {
     }
   };
 
-  const calculateRollingAverages = (data) => {
-    return data.map((_, index, array) => {
-      const start = Math.max(0, index - 6);
-      const window = array.slice(start, index + 1);
-      
-      const avgGoogleRoas = window.reduce((sum, item) => sum + item.googleRoas, 0) / window.length;
-      const avgLevantaRoas = window.reduce((sum, item) => sum + item.levantaRoas, 0) / window.length;
-      const avgCost = window.reduce((sum, item) => sum + item.cost, 0) / window.length;
-
-      return {
-        ...array[index],
-        googleRoasAvg: parseFloat(avgGoogleRoas.toFixed(2)),
-        levantaRoasAvg: parseFloat(avgLevantaRoas.toFixed(2)),
-        costAvg: parseFloat(avgCost.toFixed(2))
-      };
-    });
-  };
-
   const mergeData = (googleData, levantaData) => {
     const googleMap = new Map(
       googleData.map(item => [
@@ -123,11 +105,39 @@ function App() {
     return sortedData;
   };
 
-  // Add useEffect to load default data
+  const calculateRollingAverages = (data) => {
+    return data.map((_, index, array) => {
+      const start = Math.max(0, index - 6);
+      const window = array.slice(start, index + 1);
+      
+      const avgGoogleRoas = window.reduce((sum, item) => sum + item.googleRoas, 0) / window.length;
+      const avgLevantaRoas = window.reduce((sum, item) => sum + item.levantaRoas, 0) / window.length;
+      const avgCost = window.reduce((sum, item) => sum + item.cost, 0) / window.length;
+
+      return {
+        ...array[index],
+        googleRoasAvg: parseFloat(avgGoogleRoas.toFixed(2)),
+        levantaRoasAvg: parseFloat(avgLevantaRoas.toFixed(2)),
+        costAvg: parseFloat(avgCost.toFixed(2))
+      };
+    });
+  };
+
   useEffect(() => {
     try {
-      const googleAdsData = processGoogleAdsData(defaultGoogleData);
-      const levantaData = processLevantaData(defaultLevantaData);
+      const storedGoogleAdsData = localStorage.getItem('googleAdsData');
+      const storedLevantaData = localStorage.getItem('levantaData');
+
+      let googleAdsData, levantaData;
+
+      if (storedGoogleAdsData && storedLevantaData) {
+        googleAdsData = JSON.parse(storedGoogleAdsData);
+        levantaData = JSON.parse(storedLevantaData);
+      } else {
+        googleAdsData = processGoogleAdsData(defaultGoogleData);
+        levantaData = processLevantaData(defaultLevantaData);
+      }
+
       const merged = mergeData(googleAdsData, levantaData);
       setMergedData(merged);
     } catch (err) {
@@ -149,7 +159,7 @@ function App() {
       );
 
       let googleAdsData, levantaData;
-      
+
       fileContents.forEach(content => {
         if (content.includes('Conv. value,Currency code,Cost')) {
           googleAdsData = processGoogleAdsData(content);
@@ -165,6 +175,10 @@ function App() {
 
       const merged = mergeData(googleAdsData, levantaData);
       setMergedData(merged);
+
+      // Save new data to local storage
+      localStorage.setItem('googleAdsData', JSON.stringify(googleAdsData));
+      localStorage.setItem('levantaData', JSON.stringify(levantaData));
     } catch (err) {
       setError('Error processing files: ' + err.message);
     }
