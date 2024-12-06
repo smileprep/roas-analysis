@@ -445,7 +445,7 @@ const revertToDefaultData = () => {
               <>
                 <div className="space-y-6">
                   <div className="w-full h-[400px] bg-white p-4 rounded-lg border border-gray-200">
-                    <h3 className="text-lg font-semibold mb-4">Daily Values</h3>
+                    <h3 className="text-lg font-semibold mb-4">Daily Values (ROAS)</h3>
                     <ComposedChart width={1000} height={350} data={filteredMergedData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
@@ -482,7 +482,7 @@ const revertToDefaultData = () => {
                   </div>
 
                   <div className="w-full h-[400px] bg-white p-4 rounded-lg border border-gray-200">
-                    <h3 className="text-lg font-semibold mb-4">7-Day Rolling Average</h3>
+                    <h3 className="text-lg font-semibold mb-4">7-Day Rolling Average (ROAS)</h3>
                     <ComposedChart width={1000} height={350} data={filteredRollingAverageData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />

@@ -1,5 +1,65 @@
 export const defaultLevantaData = [
   {
+    "date": "12/4/2024",
+    "levantaConvValue": 267.71
+  },
+  {
+    "date": "12/3/2024",
+    "levantaConvValue": 369.33
+  },
+  {
+    "date": "12/2/2024",
+    "levantaConvValue": 415
+  },
+  {
+    "date": "12/1/2024",
+    "levantaConvValue": 244.94
+  },
+  {
+    "date": "11/30/2024",
+    "levantaConvValue": 619.42
+  },
+  {
+    "date": "11/29/2024",
+    "levantaConvValue": 402.61
+  },
+  {
+    "date": "11/28/2024",
+    "levantaConvValue": 318.5
+  },
+  {
+    "date": "11/27/2024",
+    "levantaConvValue": 294.22
+  },
+  {
+    "date": "11/26/2024",
+    "levantaConvValue": 257.03
+  },
+  {
+    "date": "11/25/2024",
+    "levantaConvValue": 123.36
+  },
+  {
+    "date": "11/24/2024",
+    "levantaConvValue": 202.75
+  },
+  {
+    "date": "11/23/2024",
+    "levantaConvValue": 238.34
+  },
+  {
+    "date": "11/22/2024",
+    "levantaConvValue": 119.58
+  },
+  {
+    "date": "11/21/2024",
+    "levantaConvValue": 192.04
+  },
+  {
+    "date": "11/20/2024",
+    "levantaConvValue": 149.07
+  },
+  {
     "date": "11/19/2024",
     "levantaConvValue": 169.29
   },
@@ -13,7 +73,7 @@ export const defaultLevantaData = [
   },
   {
     "date": "11/16/2024",
-    "levantaConvValue": 101.79
+    "levantaConvValue": 97.29
   },
   {
     "date": "11/15/2024",
@@ -61,7 +121,7 @@ export const defaultLevantaData = [
   },
   {
     "date": "11/4/2024",
-    "levantaConvValue": 308.69
+    "levantaConvValue": 291.89
   },
   {
     "date": "11/3/2024",
@@ -81,7 +141,7 @@ export const defaultLevantaData = [
   },
   {
     "date": "10/30/2024",
-    "levantaConvValue": 376.78
+    "levantaConvValue": 359.98
   },
   {
     "date": "10/29/2024",
@@ -89,11 +149,11 @@ export const defaultLevantaData = [
   },
   {
     "date": "10/28/2024",
-    "levantaConvValue": 202.08
+    "levantaConvValue": 185.28
   },
   {
     "date": "10/27/2024",
-    "levantaConvValue": 285.6
+    "levantaConvValue": 246.4
   },
   {
     "date": "10/26/2024",
@@ -101,7 +161,7 @@ export const defaultLevantaData = [
   },
   {
     "date": "10/25/2024",
-    "levantaConvValue": 271.43
+    "levantaConvValue": 254.63
   },
   {
     "date": "10/24/2024",

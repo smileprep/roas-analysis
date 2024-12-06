@@ -631,7 +631,7 @@ export const defaultGoogleData = [
   },
   {
     "date": "2024-11-04",
-    "googleConvValue": 326.36,
+    "googleConvValue": 326.82,
     "cost": 387.59
   },
   {
@@ -651,7 +651,7 @@ export const defaultGoogleData = [
   },
   {
     "date": "2024-11-08",
-    "googleConvValue": 106.36,
+    "googleConvValue": 106.96,
     "cost": 411.47
   },
   {
@@ -661,12 +661,12 @@ export const defaultGoogleData = [
   },
   {
     "date": "2024-11-10",
-    "googleConvValue": 153.5,
+    "googleConvValue": 154.28,
     "cost": 375.02
   },
   {
     "date": "2024-11-11",
-    "googleConvValue": 134.79,
+    "googleConvValue": 134.91,
     "cost": 278.6
   },
   {
@@ -676,37 +676,112 @@ export const defaultGoogleData = [
   },
   {
     "date": "2024-11-13",
-    "googleConvValue": 83.25,
+    "googleConvValue": 87.97,
     "cost": 73.76
   },
   {
     "date": "2024-11-14",
-    "googleConvValue": 20.3,
+    "googleConvValue": 24.26,
     "cost": 70.95
   },
   {
     "date": "2024-11-15",
-    "googleConvValue": 16.8,
+    "googleConvValue": 18.14,
     "cost": 59.96
   },
   {
     "date": "2024-11-16",
-    "googleConvValue": 71.04,
+    "googleConvValue": 100.73,
     "cost": 81.17
   },
   {
     "date": "2024-11-17",
-    "googleConvValue": 79.34,
+    "googleConvValue": 103.92,
     "cost": 99.15
   },
   {
     "date": "2024-11-18",
-    "googleConvValue": 103.54,
+    "googleConvValue": 118.55,
     "cost": 170.91
   },
   {
     "date": "2024-11-19",
-    "googleConvValue": 97.3,
-    "cost": 167.01
+    "googleConvValue": 135.19,
+    "cost": 166.61
+  },
+  {
+    "date": "2024-11-20",
+    "googleConvValue": 152.53,
+    "cost": 158.12
+  },
+  {
+    "date": "2024-11-21",
+    "googleConvValue": 150.89,
+    "cost": 211.46
+  },
+  {
+    "date": "2024-11-22",
+    "googleConvValue": 156.03,
+    "cost": 262.8
+  },
+  {
+    "date": "2024-11-23",
+    "googleConvValue": 200.64,
+    "cost": 338.91
+  },
+  {
+    "date": "2024-11-24",
+    "googleConvValue": 238.4,
+    "cost": 452.74
+  },
+  {
+    "date": "2024-11-25",
+    "googleConvValue": 143.32,
+    "cost": 306.09
+  },
+  {
+    "date": "2024-11-26",
+    "googleConvValue": 235.55,
+    "cost": 325.15
+  },
+  {
+    "date": "2024-11-27",
+    "googleConvValue": 283.29,
+    "cost": 306.62
+  },
+  {
+    "date": "2024-11-28",
+    "googleConvValue": 321.76,
+    "cost": 389.23
+  },
+  {
+    "date": "2024-11-29",
+    "googleConvValue": 310.05,
+    "cost": 516.64
+  },
+  {
+    "date": "2024-11-30",
+    "googleConvValue": 581.11,
+    "cost": 701.29
+  },
+  {
+    "date": "2024-12-01",
+    "googleConvValue": 228.99,
+    "cost": 413.37
+  },
+  {
+    "date": "2024-12-02",
+    "googleConvValue": 287.7,
+    "cost": 409.5
+  },
+  {
+    "date": "2024-12-03",
+    "googleConvValue": 215,
+    "cost": 406.94
+  },
+  {
+    "date": "2024-12-04",
+    "googleConvValue": 126.91,
+    "cost": 404.57
   }
 ];
